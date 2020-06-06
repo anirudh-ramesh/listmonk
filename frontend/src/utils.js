@@ -1,82 +1,65 @@
-import React from "react"
-import ReactDOM from "react-dom"
+import {
+  ToastProgrammatic as Toast,
+  DialogProgrammatic as Dialog,
+} from 'buefy';
 
-import { Alert } from "antd"
+const reEmail = /(.+?)@(.+?)/ig;
 
-class Utils {
-  static months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
-  ]
-  static days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+export default class utils {
+  static months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+    'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Converts the ISO date format to a simpler form.
-  static DateString = (stamp, showTime) => {
+  static days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Parses an ISO timestamp to a simpler form.
+  static niceDate = (stamp, showTime) => {
     if (!stamp) {
-      return ""
+      return '';
     }
 
-    let d = new Date(stamp)
-    let out =
-      Utils.days[d.getDay()] +
-      ", " +
-      d.getDate() +
-      " " +
-      Utils.months[d.getMonth()] +
-      " " +
-      d.getFullYear()
-
+    const d = new Date(stamp);
+    let out = `${utils.days[d.getDay()]}, ${d.getDate()}`;
+    out += ` ${utils.months[d.getMonth()]} ${d.getFullYear()}`;
     if (showTime) {
-      out += " " + d.getHours() + ":" + d.getMinutes()
+      out += ` ${d.getHours()}:${d.getMinutes()}`;
     }
 
-    return out
-  }
+    return out;
+  };
 
-  // HttpError takes an axios error and returns an error dict after some sanity checks.
-  static HttpError = err => {
-    if (!err.response) {
-      return err
-    }
+  // Simple, naive, e-mail address check.
+  static validateEmail = (e) => e.match(reEmail);
 
-    if (!err.response.data || !err.response.data.message) {
-      return {
-        message: err.message + " - " + err.response.request.responseURL,
-        data: {}
-      }
-    }
+  static confirm = (msg, onConfirm, onCancel) => {
+    Dialog.confirm({
+      scroll: 'keep',
+      message: !msg ? 'Are you sure?' : msg,
+      onConfirm,
+      onCancel,
+    });
+  };
 
-    return {
-      message: err.response.data.message,
-      data: err.response.data.data
-    }
-  }
+  static prompt = (msg, inputAttrs, onConfirm, onCancel) => {
+    Dialog.prompt({
+      scroll: 'keep',
+      message: msg,
+      confirmText: 'OK',
+      inputAttrs: {
+        type: 'string',
+        maxlength: 200,
+        ...inputAttrs,
+      },
+      trapFocus: true,
+      onConfirm,
+      onCancel,
+    });
+  };
 
-  // Shows a flash message.
-  static Alert = (msg, msgType) => {
-    document.getElementById("alert-container").classList.add("visible")
-    ReactDOM.render(
-      <Alert message={msg} type={msgType} showIcon />,
-      document.getElementById("alert-container")
-    )
-  }
-  static ModalAlert = (msg, msgType) => {
-    document.getElementById("modal-alert-container").classList.add("visible")
-    ReactDOM.render(
-      <Alert message={msg} type={msgType} showIcon />,
-      document.getElementById("modal-alert-container")
-    )
-  }
+  static toast = (msg, typ) => {
+    Toast.open({
+      message: msg,
+      type: !typ ? 'is-success' : typ,
+      queue: false,
+    });
+  };
 }
-
-export default Utils
